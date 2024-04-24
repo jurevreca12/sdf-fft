@@ -4,7 +4,8 @@ package fft
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.{DataMirror, FixedPoint}
+import chisel3.experimental.DataMirror
+import fixedpoint._
 
 import freechips.rocketchip.amba.axi4._
 import freechips.rocketchip.amba.axi4stream._

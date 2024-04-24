@@ -5,12 +5,14 @@ package fft
 import chisel3._
 import chisel3.util._
 import chisel3.experimental._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
+import chisel3.stage.ChiselGeneratorAnnotation
+import _root_.circt.stage.ChiselStage
 
 import dsptools._
 import dsptools.numbers._
 import dspblocks.CounterWithReset
 import scala.math._
+import fixedpoint._
 
 case class BitReversePingPongParams[T <: Data](
   val proto:          DspComplex[T], // data type
@@ -288,5 +290,5 @@ object BitReversePingPongApp extends App {
     "--log-level",
     "info"
   )
-  (new ChiselStage).execute(arguments, Seq(ChiselGeneratorAnnotation(() => new BitReversePingPong(params))))
+  ChiselStage.emitSystemVerilogFile(new BitReversePingPong(params), firtoolOpts=arguments) 
 }

@@ -5,7 +5,9 @@ package fft
 import chisel3._
 import chisel3.util._
 import chisel3.experimental._
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
+import chisel3.stage.ChiselGeneratorAnnotation
+import _root_.circt.stage.ChiselStage
+import fixedpoint._
 
 import dsptools._
 import dsptools.numbers._
@@ -285,9 +287,9 @@ object MultipleFFTsDspBlockTL extends App {
     ) with dspblocks.TLStandaloneBlock
   )
 
-  (new ChiselStage).execute(
+  ChiselStage.emitSystemVerilogFile(
+    lazyDut.module,
     Array("--target-dir", "verilog/AXI4MultipleFFTsBlock"),
-    Seq(ChiselGeneratorAnnotation(() => lazyDut.module))
   )
 }
 

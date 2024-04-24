@@ -4,8 +4,9 @@ package fft
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.FixedPoint
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
+import chisel3.stage.ChiselGeneratorAnnotation
+import _root_.circt.stage.ChiselStage
+import fixedpoint._
 
 import dsptools._
 import dsptools.numbers._
@@ -564,8 +565,8 @@ object SDFRadix22AppRunTime extends App {
     keepMSBorLSB = Array.fill(log2Up(16))(true),
     binPoint = 0
   )
-  (new ChiselStage).execute(
+  ChiselStage.emitSystemVerilogFile(
+    new SDFChainRadix22(params),
     Array("--target-dir", "verilog/SDFRadix22RunTime"),
-    Seq(ChiselGeneratorAnnotation(() => new SDFChainRadix22(params)))
   )
 }

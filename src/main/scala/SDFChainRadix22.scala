@@ -4,8 +4,9 @@ package fft
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.FixedPoint
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
+import chisel3.stage.ChiselGeneratorAnnotation
+import _root_.circt.stage.ChiselStage
+import fixedpoint._
 
 import dsptools._
 import dsptools.numbers._
@@ -666,5 +667,5 @@ object SDFRadix22App extends App {
     "info"
   )
   // generate blackbox-es for memories
-  (new ChiselStage).execute(arguments, Seq(ChiselGeneratorAnnotation(() => new SDFChainRadix22(params))))
+  ChiselStage.emitSystemVerilogFile(new SDFChainRadix22(params), arguments)
 }

@@ -4,7 +4,7 @@ package fft
 
 import chisel3._
 import chisel3.util._
-import chisel3.experimental.FixedPoint
+import fixedpoint._
 
 import dsptools._
 import dsptools.numbers._
@@ -327,7 +327,7 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
   val totalDataWidth = params.protoIQ.real.getWidth * 2
   val twiddles_rom = Wire(Vec(delay, params.protoTwiddle.cloneType))
   val tw =
-    if (params.decimType == DIFDecimType) ShiftRegister(twiddles_rom(io.cntr), params.numAddPipes, en = true.B)
+    if (params.decimType == DIFDecimType) ShiftRegister(twiddles_rom(io.cntr), params.numAddPipes, true.B)
     else twiddles_rom(io.cntr)
 
   DspContext.withTrimType(Convergent) {
@@ -361,8 +361,8 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
       ) { io.in.context_*(tw) }
       inpOuttw := DspContext.withTrimType(params.trimType) { mulres.trimBinary(bpos) }
     }
-    inpOut := ShiftRegister(io.in, complexMulLatency, en = true.B)
-    when(ShiftRegister(io.cntr > delay, complexMulLatency, en = true.B)) {
+    inpOut := ShiftRegister(io.in, complexMulLatency, true.B)
+    when(ShiftRegister(io.cntr > delay, complexMulLatency, true.B)) {
       inp := inpOuttw
     }.otherwise {
       inp := inpOut
@@ -370,7 +370,7 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
     io.out := out
   } else {
     inp := io.in
-    val multipleSignal = ShiftRegister(io.cntr < delay.U && io.cntr =/= 0.U, params.numAddPipes, en = true.B)
+    val multipleSignal = ShiftRegister(io.cntr < delay.U && io.cntr =/= 0.U, params.numAddPipes, true.B)
     val ioOuttw = Wire(io.out.cloneType)
     val ioOut = Wire(io.out.cloneType)
 
@@ -385,8 +385,8 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
       ) { out.context_*(tw) }
       ioOuttw := DspContext.withTrimType(params.trimType) { mulres.trimBinary(bpos) }
     }
-    ioOut := ShiftRegister(out, complexMulLatency, en = true.B)
-    when(ShiftRegister(multipleSignal, complexMulLatency, en = true.B)) {
+    ioOut := ShiftRegister(out, complexMulLatency, true.B)
+    when(ShiftRegister(multipleSignal, complexMulLatency, true.B)) {
       io.out := ioOuttw
     }.otherwise {
       io.out := ioOut
@@ -399,7 +399,7 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
   if (params.decimType == DIFDecimType) {
     load_input := io.cntr < delay.U
   } else {
-    load_input := ShiftRegister(io.cntr < delay.U, complexMulLatency, resetData = false.B, en = true.B)
+    load_input := ShiftRegister(io.cntr < delay.U, complexMulLatency, false.B, true.B)
   }
   val shift_in = Wire(inp.cloneType)
   shift_in := Mux(load_input, inp, butterfly_outputs(1))
@@ -414,7 +414,7 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
         name = "SRAM" + "_depth_" + delay.toString + "_width_" + totalDataWidth.toString + s"_mem"
       )
     } else {
-      shift_out := ShiftRegister(shift_in, delay, en = io.en)
+      shift_out := ShiftRegister(shift_in, delay, io.en)
     }
   } else {
     if (params.minSRAMdepth < delay) {
@@ -425,7 +425,7 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
         name = "SRAM" + "_depth_" + delay.toString + "_width_" + totalDataWidth.toString + s"_mem"
       )
     } else {
-      shift_out := ShiftRegister(shift_in, delay, en = ShiftRegister(io.en, complexMulLatency, true.B))
+      shift_out := ShiftRegister(shift_in, delay, ShiftRegister(io.en, complexMulLatency, true.B))
     }
   }
   //val shift_out = if (params.decimType == DIFDecimType) ShiftRegisterMem(shift_in, delay, en = io.en) else ShiftRegisterMem(shift_in, delay, en = ShiftRegister(io.en, complexMulLatency, true.B))
@@ -475,12 +475,12 @@ class SDFStageRadix2[T <: Data: Real: BinaryRepresentation](
   if (params.overflowReg) {
     io.overflow.get := overflow
   }
-  val feedback = ShiftRegister(shift_out, params.numAddPipes, en = true.B)
-  val butt_out_0 = ShiftRegister(butterfly_outputs(0), params.numAddPipes, en = true.B)
+  val feedback = ShiftRegister(shift_out, params.numAddPipes, true.B)
+  val butt_out_0 = ShiftRegister(butterfly_outputs(0), params.numAddPipes, true.B)
   val load_output =
     if (params.decimType == DIFDecimType)
-      ShiftRegister(load_input, params.numAddPipes, resetData = false.B, en = true.B)
-    else ShiftRegister(io.cntr < delay.U, params.numAddPipes + complexMulLatency, resetData = false.B, en = true.B)
+      ShiftRegister(load_input, params.numAddPipes, false.B, true.B)
+    else ShiftRegister(io.cntr < delay.U, params.numAddPipes + complexMulLatency, false.B, true.B)
 
   out := Mux(load_output, feedback, butt_out_0)
 }

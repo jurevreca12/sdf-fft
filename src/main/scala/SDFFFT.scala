@@ -10,7 +10,8 @@ import dsptools._
 import dsptools.numbers._
 
 import scala.math.pow
-import chisel3.stage.{ChiselGeneratorAnnotation, ChiselStage}
+import chisel3.stage.ChiselGeneratorAnnotation
+import _root_.circt.stage.ChiselStage
 //import firrtl.transforms.{Flatten, FlattenAnnotation, NoDedupAnnotation}
 //import chisel3.util.experimental.{FlattenInstance, InlineInstance}
 
@@ -309,7 +310,7 @@ object SDFFFTSimpleApp extends App {
       "info"
     )
     //(new ChiselStage).execute(arguments, Seq(ChiselGeneratorAnnotation(() =>new SDFFFT(params) with FlattenInstance)))
-    (new ChiselStage).execute(arguments, Seq(ChiselGeneratorAnnotation(() => new SDFFFT(params))))
+    ChiselStage.emitSystemVerilogFile(new SDFFFT(params), arguments)
   } else {
     val arguments = Array(
       "--target-dir",

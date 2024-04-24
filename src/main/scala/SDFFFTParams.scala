@@ -5,7 +5,7 @@ package fft
 import chisel3._
 import chisel3.experimental._
 import chisel3.util._
-
+import fixedpoint._
 import dsptools._
 import dsptools.numbers._
 
